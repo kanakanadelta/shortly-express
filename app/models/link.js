@@ -19,5 +19,6 @@ var Link = db.Model.extend({
     });
   }
 });
+//possibly pass this method over to config.js for our password database
 
 module.exports = Link;
