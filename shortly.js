@@ -60,7 +60,7 @@ function(req, res) {
         }
 
         Links.create({
-          url: uri,
+          url: uri, //might change this to url
           title: title,
           baseUrl: req.headers.origin
         })
