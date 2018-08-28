@@ -12,6 +12,7 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var bcrypt = require('bcrypt-nodejs')
 
 
 var app = express();
@@ -79,20 +80,32 @@ app.get('/links',
   });
 
 //implement signup password here and use bcrypt
-// app.get('/signup',
-//   function (req, res) {
-//     res.render('signup');
-//   })
+app.get('/signup',
+  function (req, res) {
+    res.render('signup');
+  })
 
 ////////////
 //APP.POST//
 ////////////
 
-// app.post('/signup',
-// function(req, res){
-//req.body.username push into table schema
-//req.body.password push into schema
-// })
+app.post('/signup',
+function(req, res){
+  var username = req.body.username;
+  bcrypt.hash(req.body.password, null, null, function(err, hash){
+    var user = new User({username:username, password:hash})
+    user.save().then(function(newUser){
+
+      console.log("succesfully added " +username+ "to the database!")
+      req.session.regenerate(function(){
+        res.redirect('/');
+        req.session.user = user;
+      })
+    })
+  })
+// req.body.username push into table schema
+// req.body.password push into schema
+})
 
 app.post('/links',
   function (req, res) {
@@ -130,19 +143,37 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
-// app.post('/login', 
-//   function (req, res) {
-//     var username = req.body.username;
-//     var password = req.body.password;
-//     app.db.get("SELECT username FROM users", function(err, row){
-//       console.log('row', row)
-//       //res.json({ "count" : row.value });
-//   });
-//     // if(username === ){
+app.post('/login', 
+  function (req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
 
-//     // }
-//   //console.log('req.body', req.body, 'db', db.body)
-// });
+    new User({ username: username}).fetch().then(function(found){
+      if(found){
+        console.log("User's username was found in the database!", username)
+
+        bcrypt.compare(password, found.get('password'), function(err, res){
+          if(res){
+            req.session.regenerate(function(){
+              console.log("password matches! redirecting...")
+              response.redirect('/')
+              req.session.found = found.username;
+            })
+          } else {
+            console.log("password did not match... redirecting to signup", password)
+            response.redirect('/signup')
+          }
+        })
+      } else {
+        console.log("username did not match... redirecting to signup");
+        response.redirect('/signup');
+      }
+    })
+      //res.json({ "count" : row.value });
+    // if(username === ){
+    // }
+  //console.log('req.body', req.body, 'db', db.body)
+});
 
 
 /************************************************************/
