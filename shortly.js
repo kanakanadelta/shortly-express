@@ -89,6 +89,11 @@ app.get('/signup',
     res.render('signup');
   })
 
+// app.get('log-out',
+// function*(req, res){
+//   res.render('login');
+// })
+
 ////////////
 //APP.POST//
 ////////////
