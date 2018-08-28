@@ -38,8 +38,9 @@ app.use(session({
 //////////////
 
 function loggedIn(req, res, next) {
-  // console.log('what is this?', req.session.user)
-  if (req.session.user) {
+   //console.log('what is this?', req.session)
+  if (req.session) {
+    //console.log('in loggedIn', req.session.found)
     return next();
   } else {
     res.redirect('/login');
@@ -72,7 +73,7 @@ app.get('/create', loggedIn,
   });
 
 //originally links // Implement login redirect here
-app.get('/links',
+app.get('/links', loggedIn,
   function (req, res) {
     Links.reset().fetch().then(function (links) {
       res.status(200).send(links.models);
@@ -153,11 +154,11 @@ app.post('/login',
       if(found){
         console.log("User's username was found in the database!", username)
 
-        bcrypt.compare(password, found.get('password'), function(err, found){
-          if(found){
+        bcrypt.compare(password, found.get('password'), function(err, passRes){
+          if(passRes){
             req.session.regenerate(function(){
               console.log("password matches! redirecting...")
-              console.log('what is found', found);
+              //console.log('what is found', found);
               res.redirect('/')
               req.session.found = found.username;
             })
