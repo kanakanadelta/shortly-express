@@ -38,7 +38,7 @@ app.use(session({
 //////////////
 
 function loggedIn(req, res, next) {
-  console.log(req.session.user)
+  // console.log('what is this?', req.session.user)
   if (req.session.user) {
     return next();
   } else {
@@ -53,7 +53,7 @@ function loggedIn(req, res, next) {
 // app.use(cookieParser());
 
 // REDIRECT to '/login'  if User is not LOGGED IN //
-app.get('/login', //make new client side for login (view, model)
+app.get('/login', 
 function(req, res) {
   res.render('login'); 
 });
@@ -98,7 +98,7 @@ function(req, res){
 
       console.log("succesfully added " +username+ "to the database!")
       req.session.regenerate(function(){
-        res.redirect('/');
+        res.redirect('/login');
         req.session.user = user;
       })
     })
@@ -147,26 +147,28 @@ app.post('/login',
   function (req, res) {
     var username = req.body.username;
     var password = req.body.password;
+    console.log('userpass  ',username, password);
 
     new User({ username: username}).fetch().then(function(found){
       if(found){
         console.log("User's username was found in the database!", username)
 
-        bcrypt.compare(password, found.get('password'), function(err, res){
-          if(res){
+        bcrypt.compare(password, found.get('password'), function(err, found){
+          if(found){
             req.session.regenerate(function(){
               console.log("password matches! redirecting...")
-              response.redirect('/')
+              console.log('what is found', found);
+              res.redirect('/')
               req.session.found = found.username;
             })
           } else {
             console.log("password did not match... redirecting to signup", password)
-            response.redirect('/signup')
+            res.redirect('/signup')
           }
         })
       } else {
         console.log("username did not match... redirecting to signup");
-        response.redirect('/signup');
+        res.redirect('/signup');
       }
     })
       //res.json({ "count" : row.value });
