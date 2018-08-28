@@ -32,6 +32,10 @@ app.use(session({
   cookie: { secure: true }
 }));
 
+//////////////
+//Middleware//
+//////////////
+
 function loggedIn(req, res, next) {
   console.log(req.session.user)
   if (req.session.user) {
@@ -40,6 +44,10 @@ function loggedIn(req, res, next) {
     res.redirect('/login');
   }
 }
+
+///////////
+//APP.GET//
+///////////
 
 // app.use(cookieParser());
 
@@ -57,12 +65,12 @@ app.get('/', loggedIn,
   });
 
 //originally create
-app.get('/create',
+app.get('/create', loggedIn,
   function (req, res) {
     res.render('index');
   });
 
-//originally links
+//originally links // Implement login redirect here
 app.get('/links',
   function (req, res) {
     Links.reset().fetch().then(function (links) {
@@ -71,11 +79,20 @@ app.get('/links',
   });
 
 //implement signup password here and use bcrypt
-app.get('/signup',
-  function (req, res) {
+// app.get('/signup',
+//   function (req, res) {
+//     res.render('signup');
+//   })
 
-  })
+////////////
+//APP.POST//
+////////////
 
+// app.post('/signup',
+// function(req, res){
+//req.body.username push into table schema
+//req.body.password push into schema
+// })
 
 app.post('/links',
   function (req, res) {
@@ -113,6 +130,19 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
+// app.post('/login', 
+//   function (req, res) {
+//     var username = req.body.username;
+//     var password = req.body.password;
+//     app.db.get("SELECT username FROM users", function(err, row){
+//       console.log('row', row)
+//       //res.json({ "count" : row.value });
+//   });
+//     // if(username === ){
+
+//     // }
+//   //console.log('req.body', req.body, 'db', db.body)
+// });
 
 
 /************************************************************/
