@@ -69,6 +69,7 @@ function loggedIn(req, res, next) {
 // REDIRECT to '/login'  if User is not LOGGED IN //
 app.get('/login', 
 function(req, res) {
+
   res.render('login'); 
 });
 // 
@@ -99,39 +100,17 @@ app.get('/signup',
     res.render('signup');
   })
 
-// app.get('log-out',
-// function*(req, res){
-//   res.render('login');
-// })
-
 ////////////
 //APP.POST//
 ////////////
 
-app.post('/signup',
-function(req, res){
-  var username = req.body.username;
-  bcrypt.hash(req.body.password, null, null, function(err, hash){
-    var user = new User({username:username, password:hash})
-    user.save().then(function(newUser){
-
-      console.log("succesfully added " +username+ "to the database!")
-      req.session.regenerate(function(){
-        res.redirect('/login');
-        req.session.user = user;
-      })
-    })
-  })
-// req.body.username push into table schema
-// req.body.password push into schema
-})
 
 app.post('/links',
-  function (req, res) {
-    console.log('this is req.body', req.body)
+function (req, res) {
+  // console.log('this is req.body', req.body)
     var uri = req.body.url;
-
-    console.log(uri.slice(0,7))
+    
+    // console.log(uri.slice(0,7))
     if(uri.slice(0,7)!=='http://'){
       uri = 'http://' + uri;
     }
@@ -140,7 +119,7 @@ app.post('/links',
       console.log('Not a valid url: ', uri);
       return res.sendStatus(404);
     }
-
+    
     new Link({ url: uri }).fetch().then(function (found) {
       if (found) {
         res.status(200).send(found.attributes);
@@ -150,26 +129,26 @@ app.post('/links',
             console.log('Error reading URL heading: ', err);
             return res.sendStatus(404);
           }
-
+          
           Links.create({
             url: uri, //might change this to url(req.body.url)
             title: title,
             baseUrl: req.headers.origin
           })
-            .then(function (newLink) {
-              res.status(200).send(newLink);
+          .then(function (newLink) {
+            res.status(200).send(newLink);
             });
-        });
-      }
+          });
+        }
+      });
     });
-  });
+    
+    /************************************************************/
+    // Write your authentication routes here
+    /************************************************************/
 
-/************************************************************/
-// Write your authentication routes here
-/************************************************************/
-
-app.post('/login', 
-  function (req, res) {
+    app.post('/login', 
+    function (req, res) {
     var username = req.body.username;
     var password = req.body.password;
     console.log('userpass  ',username, password);
@@ -177,11 +156,11 @@ app.post('/login',
     new User({ username: username}).fetch().then(function(found){
       if(found){
         console.log("User's username was found in the database!", username)
-
+        
         bcrypt.compare(password, found.get('password'), function(err, passRes){
           if(passRes){
             req.session.regenerate(function(){
-              console.log("password matches! redirecting...")
+              console.log("Password matches. Welcome back! redirecting you to our landing...")
               //console.log('what is found', found.attributes);
               res.redirect('/')
               // req.session.found = found.attributes.username;
@@ -189,21 +168,39 @@ app.post('/login',
               currentPwd = found.attributes.password;
             })
           } else {
-            console.log("password did not match... redirecting to signup", password)
+            console.log("Sorry, invalid password.. redirecting you to sign-up", password)
             res.redirect('/signup')
           }
         })
       } else {
-        console.log("username did not match... redirecting to signup");
+        console.log("Sorry, no username found in our database... redirecting to signup");
         res.redirect('/signup');
       }
     })
-      //res.json({ "count" : row.value });
+    //res.json({ "count" : row.value });
     // if(username === ){
-    // }
-  //console.log('req.body', req.body, 'db', db.body)
-});
-
+      // }
+      //console.log('req.body', req.body, 'db', db.body)
+    });
+    
+    //Sign-up
+    app.post('/signup',
+    function(req, res){
+      var username = req.body.username;
+      bcrypt.hash(req.body.password, null, null, function(err, hash){
+        var user = new User({username:username, password:hash})
+        user.save().then(function(newUser){
+    
+          console.log("succesfully added " +username+ "to the database!")
+          req.session.regenerate(function(){
+            res.redirect('/');
+            req.session.user = user;
+          })
+        })
+      })
+    // req.body.username push into table schema
+    // req.body.password push into schema
+    })
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
