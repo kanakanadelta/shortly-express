@@ -50,6 +50,16 @@ function loggedIn(req, res, next) {
   }
 }
 
+
+// function loggedIn(req, res, next) {
+//   //console.log('what is this?', currentUser )
+//  if (currentUser ) { store current user with id and see if it matches urls userid
+//    //console.log('in loggedIn', req.session.found)
+//    return next();
+//  } else {
+//    res.redirect('/login');
+//  }
+// }
 ///////////
 //APP.GET//
 ///////////
@@ -75,7 +85,7 @@ app.get('/create', loggedIn,
     res.render('index');
   });
 
-//originally links // Implement login redirect here
+//originally links //check if userID matches in urls table, incorporate helper function
 app.get('/links', loggedIn,
   function (req, res) {
     Links.reset().fetch().then(function (links) {
@@ -118,7 +128,13 @@ function(req, res){
 
 app.post('/links',
   function (req, res) {
+    console.log('this is req.body', req.body)
     var uri = req.body.url;
+
+    console.log(uri.slice(0,7))
+    if(uri.slice(0,7)!=='http://'){
+      uri = 'http://' + uri;
+    }
 
     if (!util.isValidUrl(uri)) {
       console.log('Not a valid url: ', uri);
