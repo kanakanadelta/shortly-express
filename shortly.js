@@ -17,6 +17,9 @@ var bcrypt = require('bcrypt-nodejs')
 
 var app = express();
 
+var currentUser;
+var currentPwd;
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(partials());
@@ -30,7 +33,7 @@ app.use(session({
   secret: 'anything',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: true, expires: new Date(Date.now() + (30 * 86400 * 1000)) }
 }));
 
 //////////////
@@ -38,8 +41,8 @@ app.use(session({
 //////////////
 
 function loggedIn(req, res, next) {
-   //console.log('what is this?', req.session)
-  if (req.session) {
+   //console.log('what is this?', currentUser )
+  if (currentUser && currentPwd) {
     //console.log('in loggedIn', req.session.found)
     return next();
   } else {
@@ -158,9 +161,11 @@ app.post('/login',
           if(passRes){
             req.session.regenerate(function(){
               console.log("password matches! redirecting...")
-              //console.log('what is found', found);
+              //console.log('what is found', found.attributes);
               res.redirect('/')
-              req.session.found = found.username;
+              // req.session.found = found.attributes.username;
+              currentUser = found.attributes.username;
+              currentPwd = found.attributes.password;
             })
           } else {
             console.log("password did not match... redirecting to signup", password)
